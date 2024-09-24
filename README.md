@@ -12,30 +12,48 @@ Au départ le capteur central est à 0 et les deux capteur latéraux sont à 1 :
 Particularité, la propulsion est assurée par deux servomoteurs à rotation continue. 
 
 ( primitives Python pour Pygmy Forth )
+
 " Tempo.fth" LOAD ( temporisation 1 sec )
+
 " ServoAV.fth" LOAD ( marche avant )
+
 " ServoAR.fth" LOAD ( marche arrière )
+
 " ServoStop.fth" LOAD ( arrêt )
+
 " TurnDW90.fth" LOAD ( tourne à droite de 90° )
+
 " TurnGL90.fth" LOAD ( tourne à gauche de 90° )
+
 " initlf1.fth" LOAD ( capteur de droite )
+
 " initlf2.fth" LOAD ( capteur du centre )
+
 " initlf3.fth" LOAD ( capteur de gauche )
+
 " initlf4.fth" LOAD ( capteur à photorésistance qui stoppe au trait noir )
 
 
 ( ServoPropulsion applications )
 : TOPWD ( - - )
+
 BEGIN ( commence la boucle )
+
 INITLF2 0= IF SERVOAV ELSE SERVOSTOP ( lit le capteur central 0 loint 1 proche )
-THEN  
+
+THEN  ( fin du branchement conditionnel )
+
 INITLF2 INITLF3 AND IF TURNDW90 (si le capteur central et (AND) le capteur gauche sont tous les deux à 1 on tourne à droite de 90°)
+
 THEN ( fin du branchement conditionnel )
+
 INITLF2 INITLF1 AND IF TURNGL90 (si le capteur central et (AND) le capteur de droite sont tous les deux à 1 on tourne à gauche de
 THEN ( fin du branchement conditionnel )
+
 INITLF4 NOT UNTIL ;( fin du programme si 0 est lu  
 
 ( contrôle)
+
 : t INITLF1 ." droite-jaune" . CR INITLF2 ." centre-vert" . CR INITLF3  ." gauche-blanc" . CR INITLF4  ." stop-jaune" .  CR  ;
 
 WORDS  CR
