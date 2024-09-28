@@ -1,0 +1,34 @@
+PygmyRobot navigates between walls.
+In this implementation, the robot must navigate through four chicanes and stop at the black line. Knowing that the Raspberry Pi only detects logical signals (0 or 1), it is important to understand the sensor’s operation. The sensor circuit is composed of an infrared diode (SFH4554) and a phototransistor (LTR4206). The phototransistor must be used in common emitter configuration with a resistor connected to ground. The value of this resistor determines the distance at which the sensor will switch from 0 to 1.
+Normally, a 2.2K resistor is used for a distance of 39mm, a 1k resistor gives 24mm, and a 390-ohm resistor gives 9mm. The 1k resistor was chosen for the central sensor. For the two lateral sensors, a 5k resistor is used, providing a detection distance of 5cm.
+Initially, the central sensor is at 0, and both lateral sensors are at 1: the robot moves forward. When it encounters a wall, the central sensor switches to 1, the right sensor switches to 0, and the left sensor remains at 1: the robot turns left or right and stops until it encounters the black surface.
+A notable feature is that propulsion is handled by two continuous-rotation servomotors.
+(Python primitives for Pygmy Forth)
+    • "Tempo.fth" LOAD (1-second delay)
+    • "ServoAV.fth" LOAD (forward movement)
+    • "ServoAR.fth" LOAD (reverse movement)
+    • "ServoStop.fth" LOAD (stop)
+    • "TurnDW90.fth" LOAD (turn 90° right)
+    • "TurnGL90.fth" LOAD (turn 90° left)
+    • "initlf1.fth" LOAD (right sensor)
+    • "initlf2.fth" LOAD (central sensor)
+    • "initlf3.fth" LOAD (left sensor)
+    • "initlf4.fth" LOAD (photoresistor sensor that stops at the black line)
+(ServoPropulsion applications)
+forth
+Copier le code
+: TOPWD ( - - )
+BEGIN ( begins the loop )
+INITLF2 0= IF SERVOAV ELSE SERVOSTOP ( reads the central sensor: 0 distant, 1 close )
+THEN
+INITLF2 INITLF3 AND IF TURNDW90 (if the central sensor AND the left sensor are both 1, turn 90° right)
+THEN
+INITLF2 INITLF1 AND IF TURNGL90 (if the central sensor AND the right sensor are both 1, turn 90° left)
+THEN
+INITLF4 NOT UNTIL ; (end the program when 0 is read)
+(control)
+forth
+Copier le code
+: t INITLF1 ." right-yellow" . CR INITLF2 ." center-green" . CR INITLF3 ." left-white" . CR INITLF4 ." stop-yellow" . CR ;
+WORDS CR
+
